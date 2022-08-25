@@ -1,9 +1,6 @@
-language: shell
-os: 
-- linux
+language: bash
 dist: trusty
-sudo: true
-language: shell
+sudo: required
 before_install:
 - curl https://raw.githubusercontent.com/express42/otus-homeworks/2019-02/run.sh |
   bash
