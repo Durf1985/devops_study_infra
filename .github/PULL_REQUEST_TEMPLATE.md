@@ -3,16 +3,16 @@
 - [ ] The main homework
 - [ ] Task with *
 
-## In the process done:
+## In the process done
 
 - Item 1
 - Item 2
 
-## How to launch a project:
+## How to launch a project
 
 - For example, run the X command in the Y directory
 
-## How to check the performance:
+## How to check the performance
 
 - For example, follow the link <http://localhost:8080>
 
