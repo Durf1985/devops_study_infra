@@ -1,18 +1,22 @@
-# Выполнено ДЗ №
+# Completed homework №
 
- - [ ] Основное ДЗ
- - [ ] Задание со *
+- [ ] The main homework
+- [ ] Task with *
 
-## В процессе сделано:
- - Пункт 1
- - Пункт 2
+## In the process done:
 
-## Как запустить проект:
- - Например, запустить команду X в директории Y
+- Item 1
+- Item 2
 
-## Как проверить работоспособность:
- - Например, перейти по ссылке http://localhost:8080
+## How to launch a project:
+
+- For example, run the X command in the Y directory
+
+## How to check the performance:
+
+- For example, follow the link <http://localhost:8080>
 
 ## PR checklist
- - [ ] Выставил label с номером домашнего задания
- - [ ] Выставил label с темой домашнего задания
+
+- [ ] The label with the homework number
+- [ ] The label with a homework topic
