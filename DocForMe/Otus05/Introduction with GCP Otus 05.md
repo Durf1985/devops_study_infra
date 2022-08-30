@@ -79,7 +79,7 @@ git checkout -b cloud-bastion
 
 4. Setup Bastion host for direct connection internalnetwork GCP
     * in localhost (your PC/laptop) setup SSH Forwarding
-      * ```$ eval `ssh-agent``
+      * ``$ eval `ssh-agent``
       * `$ ssh-add -L` (check ssh-agent list)
       * `$ ssh-add ~/.ssh/appuser` (add to ssh-agent list your ssh private key)![steps](2022-08-30-06-58-46.png)
     * try to connection to internal-host via bastion
