@@ -30,11 +30,11 @@ git checkout -b cloud-bastion
 7. After creation select Settings-Metadata-SSH keys ![add ssh-key](2022-08-29-05-34-38.png)
 
 8. Create on your Linux/Unix system ssh-key.
-    * ssh-keygen -t rsa -f ~/.ssh/appuser -C appuser -P ""
-    * Private key ~/.ssh/appuser
-    * Public key ~/.ssh/appuser.pub
+    * `ssh-keygen -t rsa -f ~/.ssh/appuser -C appuser -P ""`
+    * `Private key ~/.ssh/appuser`
+    * `Public key ~/.ssh/appuser.pub`
 
-9. Copy content from ~/.ssh/appuser.pub to our project ![SSH-key insert here](2022-08-29-05-39-03.png).
+9. Copy content from `~/.ssh/appuser.pub` to our project ![SSH-key insert here](2022-08-29-05-39-03.png).
     * If ssh-key in Metadate project, this applies to all VM machines in the project
     * Can be overriden when creating VM
     * Can be block when creating VM
@@ -64,7 +64,7 @@ git checkout -b cloud-bastion
     * If appeared check ssh connection ![ssh-check](2022-08-30-06-20-19.png) you should see the VM terminal
 
 15. try to connect to bastion with terminal linux and using early created ssh key
-    * ssh -i ~/.ssh/appuser appuser@externalIpAddrBastion ![log](2022-08-30-06-28-57.png)
+    * `ssh -i ~/.ssh/appuser appuser@externalIpAddrBastion` ![log](2022-08-30-06-28-57.png)
 
 ## Second internal-host
 
@@ -74,24 +74,24 @@ git checkout -b cloud-bastion
 
 3. try to connect to bastion (Item 9), and then in bastion terminal try to connect to internal-host
     * if you setup firewall allow only your IP, you need add internal IP your bastion setting in firewall rule or create new firewall rule with this IP address
-    * "$ ssh internalIp" ![internal Ip](2022-08-30-06-43-55.png)
+    * `$ ssh internalIp` ![internal Ip](2022-08-30-06-43-55.png)
     * if all right you see "permission denied" ![permission](2022-08-30-06-45-10.png)
 
 4. Setup Bastion host for direct connection internalnetwork GCP
     * in localhost (your PC/laptop) setup SSH Forwarding
-      * $ eval `ssh-agent`
-      * $ ssh-add -L (check ssh-agent list)
-      * $ ssh-add ~/.ssh/appuser (add to ssh-agent list your ssh private key)![steps](2022-08-30-06-58-46.png)
+      * ```$ eval `ssh-agent``
+      * `$ ssh-add -L` (check ssh-agent list)
+      * `$ ssh-add ~/.ssh/appuser` (add to ssh-agent list your ssh private key)![steps](2022-08-30-06-58-46.png)
     * try to connection to internal-host via bastion
-      * $ ssh -i ~/.ssh/appuser -A appuser@bastionIp
-      * $ ssh internal-host-ip![expected terminal log](2022-08-30-07-04-03.png)
+      * `$ ssh -i ~/.ssh/appuser -A appuser@bastionIp`
+      * `$ ssh internal-host-ip` ![expected terminal log](2022-08-30-07-04-03.png)
     * make sure that you are on the right host![check host](2022-08-30-07-06-38.png)
 
 5. one-command connection to the internal host ssh -J appuser@bastionIp appuser@internalHostIp
 
-6. create in ~/.zshrc function
+6. create in `~/.zshrc` function
    * before edit "~/.zshrc", create backup this file
-   * "nano ~/.zshrc"
+   * `nano ~/.zshrc`
    * type text: sshotus () {
 eval `ssh-agent`
 ssh-add ~/.ssh/appuser
@@ -100,4 +100,4 @@ ssh -J appuser@ip-bastion appuser@ip-internal-host
 
 7. save changes and restart terminal to make the function avalible
 
-8. try to connect use function-alias "sshotus" ![sshotus](2022-08-31-05-05-49.png)
+8. try to connect use function-alias `sshotus` ![sshotus](2022-08-31-05-05-49.png)
