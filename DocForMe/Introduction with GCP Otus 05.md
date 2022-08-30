@@ -46,7 +46,24 @@ git checkout -b cloud-bastion
     * Machine Type: e2-micro ![setup list](2022-08-29-07-25-06.png)
     * Boot disk: Ubuntu - lastversion ![OS Version](2022-08-29-07-26-32.png)
     * Allow HTTP&HTTPS traffic ![HTTP(s) Allow Settings](2022-08-30-05-56-40.png)
-13. Open Advanced option and setup networking ![NetworkSettings](2022-08-29-07-34-10.png)
+13. Open Advanced option and setup networking like on screenshot![NetworkSettings](2022-08-29-07-34-10.png)
 14. Create VM![VM created](2022-08-29-07-46-31.png)
-    * Check that your VM appeared in the Firewall rule you created
+    * Check that your VM appeared in the Firewall rule you created ![firewall list](2022-08-30-06-24-02.png)
     * If appeared check ssh connection ![ssh-check](2022-08-30-06-20-19.png) you should see the VM terminal
+15. try to connect to bastion with terminal linux and using early created ssh key 
+    * ssh -i ~/.ssh/appuser appuser@externalIpAddrBastion ![log](2022-08-30-06-28-57.png)
+
+16. Create second VM without external network ![external settings](2022-08-30-06-35-23.png)
+17. Check ![internal host](2022-08-30-06-38-31.png)
+18. try to connect to bastion (Item 9), and then in bastion terminal try to connect to internal-host
+    * "$ ssh internalIp" ![internal Ip](2022-08-30-06-43-55.png)
+    * if all right you see "permission denied" ![permission](2022-08-30-06-45-10.png)
+19. Setup Bastion host for direct connection internalnetwork GCP
+    * in localhost (your PC/laptop) setup SSH Forwarding
+      * $ eval `ssh-agent` 
+      * $ ssh-add -L (check ssh-agent list)
+      * $ ssh-add ~/.ssh/appuser (add to ssh-agent list your ssh private key)![steps](2022-08-30-06-58-46.png)
+    * try to connection to internal-host via bastion
+      * $ ssh -i ~/.ssh/appuser -A appuser@bastionIp
+      * $ ssh internal-host-ip![expected terminal log](2022-08-30-07-04-03.png)
+    * make sure that you are on the right host![check host](2022-08-30-07-06-38.png)
