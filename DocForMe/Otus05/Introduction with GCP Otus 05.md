@@ -73,6 +73,7 @@ git checkout -b cloud-bastion
 2. Check ![internal host](2022-08-30-06-38-31.png)
 
 3. try to connect to bastion (Item 9), and then in bastion terminal try to connect to internal-host
+    * if you setup firewall allow only your IP, you need add internal IP your bastion setting in firewall rule or create new firewall rule with this IP address
     * "$ ssh internalIp" ![internal Ip](2022-08-30-06-43-55.png)
     * if all right you see "permission denied" ![permission](2022-08-30-06-45-10.png)
 
@@ -85,7 +86,18 @@ git checkout -b cloud-bastion
       * $ ssh -i ~/.ssh/appuser -A appuser@bastionIp
       * $ ssh internal-host-ip![expected terminal log](2022-08-30-07-04-03.png)
     * make sure that you are on the right host![check host](2022-08-30-07-06-38.png)
-5. one-command connection to the internal host ssh -A appuser@bastionIp -t ssh appuser@internalHostIp 
-   * -A Forwarding authentification
-   * -t supress warning
-   * ![log](2022-08-30-13-36-24.png)
+
+5. one-command connection to the internal host ssh -J appuser@bastionIp appuser@internalHostIp
+
+6. create in ~/.zshrc function
+   * before edit "~/.zshrc", create backup this file
+   * "nano ~/.zshrc"
+   * type text: sshotus () {
+eval `ssh-agent`
+ssh-add ~/.ssh/appuser
+ssh -J appuser@ip-bastion appuser@ip-internal-host
+} ![file config](2022-08-31-05-12-25.png)
+
+7. save changes and restart terminal to make the function avalible
+
+8. try to connect use function-alias "sshotus" ![sshotus](2022-08-31-05-05-49.png)
