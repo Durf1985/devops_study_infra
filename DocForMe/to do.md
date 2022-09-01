@@ -1,3 +1,6 @@
+
+# Todo list
+
 tcpdump
 journalctl
 systemctl
@@ -8,3 +11,7 @@ tcp/ip
 tls ssl
 backups
 lvm - snapshot OS !!!
+bash heredoc
+
+
+ubuntu18/04

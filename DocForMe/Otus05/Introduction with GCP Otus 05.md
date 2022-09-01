@@ -54,8 +54,9 @@ git checkout -b cloud-bastion
     * Hostname: Bastion
     * Region: us-central
     * Machine Type: e2-micro ![setup list](2022-08-29-07-25-06.png)
-    * Boot disk: Ubuntu - lastversion ![OS Version](2022-08-29-07-26-32.png)
+    * Boot disk: Ubuntu - ver. 20.04 (because 22.04 not work with MongoDB at the time of creating this instruction)  ![OS Version](2022-08-29-07-26-32.png)
     * Allow HTTP&HTTPS traffic ![HTTP(s) Allow Settings](2022-08-30-05-56-40.png)
+    * Add network tags `bastion`
 
 13. Open Advanced option and setup networking like on screenshot![NetworkSettings](2022-08-29-07-34-10.png)
 
@@ -89,15 +90,66 @@ git checkout -b cloud-bastion
 
 5. one-command connection to the internal host ssh -J appuser@bastionIp appuser@internalHostIp
 
-6. create in `~/.zshrc` function
-   * before edit "~/.zshrc", create backup this file
-   * `nano ~/.zshrc`
-   * type text: sshotus () {
-eval `ssh-agent`
-ssh-add ~/.ssh/appuser
-ssh -J appuser@ip-bastion appuser@ip-internal-host
-} ![file config](2022-08-31-05-12-25.png)
-
+6. add in `~/.ssh/appuser` on your localhost next:
+   * before edit, create backup this file
+   * change IPAddres to yours
+   ![ssh-config](2022-09-01-12-03-37.png)
+  
 7. save changes and restart terminal to make the function avalible
 
-8. try to connect use function-alias `sshotus` ![sshotus](2022-08-31-05-05-49.png)
+8. try to connect use function-alias `internal` ![aliasConnection](2022-09-01-12-06-54.png)
+
+## Create VPN sever for GCP
+
+1. Login to bastion via ssh
+2. Create bash script file: `touch setupvpn.sh`
+3. Use text editor and write the following lines to the file
+
+    ```bash
+
+    sudo tee /etc/apt/sources.list.d/pritunl.list << EOF
+    deb <http://repo.pritunl.com/stable/apt> focal main
+    EOF
+    sudo apt --assume-yes install gnupg
+    gpg --keyserver hkp://keyserver.ubuntu.com --recv-keys 7568D9BB55FF9E5287D586017AE645C0CF8E292A
+    gpg --armor --export 7568D9BB55FF9E5287D586017AE645C0CF8E292A | sudo tee /etc/apt/trusted.gpg.d/pritunl.asc
+    wget -qO - <https://www.mongodb.org/static/pgp/server-6.0.asc> | sudo apt-key add -
+    echo "deb [ arch=amd64,arm64 ] <https://repo.mongodb.org/apt/ubuntu> focal/mongodb-org/6.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-6.0.  list
+    sudo apt update
+    sudo apt install -y mongodb-org pritunl
+    sudo systemctl start mongod pritunl
+    sudo systemctl enable mongod pritunl
+
+    ```
+
+4. Execute: `sudo bash setupvpn.sh`
+
+5. After execution check service status
+    * sudo systemctl status mongod
+    * sudo systemctl status pritunl ![check status](2022-09-01-13-05-05.png)
+
+6. In your browser open refer
+    `https://bastionIPAddress/setup`
+7. Ignore warning ![warning](2022-09-01-13-07-39.png)
+8. Open bastion terminal and execute instruction from pritunl page ![command](2022-09-01-13-09-24.png)
+9. Copy-paste created key and save ![key](2022-09-01-13-12-02.png)
+10. Ignore warning
+11. Execute in bastion terminal: sudo pritunl default-password
+    * copy-paste login and password
+    * sign in ![sign in](2022-09-01-13-15-32.png)
+12. initial setup
+    * setup username (test) and password (6214157507237678334670591556762) ![change](2022-09-01-13-18-42.png)
+    * save
+
+13. Add organization and user (Usetname: test, pin: 6214157507237678334670591556762 ) ![add org and user](2022-09-01-13-21-30.png)
+    ![result](2022-09-01-13-23-24.png)
+14. Create server
+    * name - test
+    * remember port ![result](2022-09-01-13-25-35.png)
+15. Attach created organization to server and start server ![start](2022-09-01-13-27-33.png)
+
+16. Create firewall rule in VPC Network GCP use tag  `bastion` and this tag to your `bastion` VM   ![VPN](2022-09-01-13-33-02.png)
+17. Download archive contained *.ovpn ![ovpn](2022-09-01-13-38-16.png)
+18. In your localhost terminal add config `*.ovpn` to openvpn : `sudo openvpn *.ovpn`
+
+19. Open new terminal and check connection througth bastion VPN server. `sudo ssh -i ~/.ssh/appuser appuser@10.128.0.8`
