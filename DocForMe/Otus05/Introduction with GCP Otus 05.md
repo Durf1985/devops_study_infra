@@ -153,3 +153,18 @@ git checkout -b cloud-bastion
 18. In your localhost terminal add config `*.ovpn` to openvpn : `sudo openvpn *.ovpn`
 
 19. Open new terminal and check connection througth bastion VPN server. `sudo ssh -i ~/.ssh/appuser appuser@10.128.0.8`
+
+
+## TLS certificate for pritunl
+
+1. use ssh and login to bastion
+2. install snapd
+3. `sudo snap install core`
+4. `sudo snap refresh core`
+5. `sudo apt-get remove certbot`
+6. `sudo snap install --classic certbot`
+7. `sudo ln -s /snap/bin/certbot /usr/bin/certbot`
+8. `shutdown your webservice sudo systemctl stop pritunl`
+9. `sudo certbot certonly --standalone -d BastionIPAddress.nip.io`
+10. install created certificate to webaplication
+11. `sudo certbot renew --dry-run`
