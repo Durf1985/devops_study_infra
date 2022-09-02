@@ -155,6 +155,9 @@ git checkout -b cloud-bastion
 
 19. Open new terminal and check connection through bastion VPN server. `sudo ssh -i ~/.ssh/appuser appuser@10.128.0.8`
 
+`bastion_IP = 35.193.139.136`
+`someinternalhost_IP = 10.128.0.8`
+
 ## TLS certificate for pritunl
 
 1. use ssh and login to bastion
