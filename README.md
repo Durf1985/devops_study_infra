@@ -1,14 +1,16 @@
-# Lecture 05 otus Introduction with GCP (via KodeKloud Playground)
+# Otus/KodeKloud
+
+## Lecture 05 otus Introduction with GCP (via KodeKloud Playground)
 
 * Create user account in GCP (use KodeKloud Playground)
 * Create instances VM in web-interface and connecting to they via SSH
 * Consider the options for connecting to hosts via bastion host and VPN
 
-## Create new branch cloud-bastion in github repository (devops_study_infra)
+### Create new branch cloud-bastion in github repository (devops_study_infra)
 
 git checkout -b cloud-bastion
 
-## Login to GCP
+### Login to GCP
 
 1. Login to KodeKloud.
 
@@ -67,7 +69,7 @@ git checkout -b cloud-bastion
 15. try to connect to bastion with terminal linux and using early created ssh key
     * `ssh -i ~/.ssh/appuser appuser@externalIpAddrBastion` ![log](doc/Otus05/2022-08-30-06-28-57.png)
 
-## Second internal-host
+### Second internal-host
 
 1. Create second VM without external network ![external settings](doc/Otus05/2022-08-30-06-35-23.png)
 
@@ -100,7 +102,7 @@ git checkout -b cloud-bastion
 
 8. try to connect use function-alias `internal` ![aliasConnection](doc/Otus05/2022-09-01-12-06-54.png)
 
-## Create VPN sever for GCP
+### Create VPN sever for GCP
 
 1. Login to bastion via ssh
 2. Create file setupvpn.sh
@@ -158,7 +160,7 @@ git checkout -b cloud-bastion
 bastion_IP = 35.193.139.136
 someinternalhost_IP = 10.128.0.8
 
-## TLS certificate for pritunl
+### TLS certificate for pritunl
 
 1. use ssh and login to bastion
 2. install snapd
@@ -170,3 +172,69 @@ someinternalhost_IP = 10.128.0.8
 8. `shutdown your web service sudo systemctl stop pritunl`
 9. `sudo certbot certonly --standalone -d BastionIPAddress.nip.io`
 10. install created certificate to web application
+
+## Lecture Otus 06 Deploy test application
+
+* Install and setup gcloud with our account
+* Create host with gcloud help
+* Install ruby on this host
+* Instal MongoDB and launch
+* Deploy test application, launch and testing
+* testapp_IP = 34.168.221.121
+* testapp_port = 9292
+
+### Install gcloud
+
+1. `curl -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-400.0.0-linux-x86_64.tar.gz`
+2. extract archive.
+3. `sudo bash cd ./google-cloud/install.sh`
+4. `gcloud init` (use your project in account GCP)
+5. check installation
+    * `gcloud auth list`
+
+    * ```bash
+        gcloud compute instances create reddit-app\
+        boot-disk-size=10GB \
+        image-family ubuntu-1804-lts \
+        image-project=ubuntu-os-cloud \
+        machine-type=g1-small \
+        tags puma-server \
+        restart-on-failure
+        ```
+
+6. Or use actual instruction <https://cloud.google.com/sdk/docs/install-sdk>
+
+### Copy scripts to remote VM instance
+
+in your repo `bash copy_to_vm`
+
+### Install Ruby and Bundler
+
+* `ssh username@hostname` login to target host
+  
+* `bash /script/install_ruby.sh`
+
+### Install mongodb
+
+* `ssh username@hostname` - login to target host
+
+* `bash /script/install_mongodb.sh`
+
+### Install application, set dependency and start server
+
+* `ssh username@hostname` login to target host
+* `git clone -b monolith https://github.com/express42/reddit.git`
+* `cd reddit && bundle install`
+* `puma -d`
+  
+### Install with startup script
+
+your local repository directory
+`bash script/startup_script.sh`
+
+### Packer
+
+packer build -var 'project_id=aaa' packer_example.json
+packer build -var-file variables.json packer_example.json
+packer validate -var 'project_id=aaa' packer_example.json
+packer inspect packer_example.json
