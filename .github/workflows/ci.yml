@@ -1,0 +1,18 @@
+name: Devops study homework tests
+
+on: [pull_request, push, workflow_dispatch]
+
+jobs:
+  build-apps:
+
+    runs-on: ubuntu-18.04
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Run homework tests
+      run: |
+        echo "GITHUB_REF_NAME=${GITHUB_REF_NAME}"
+        # dirty hack to simulate travis behavior
+        export TRAVIS_PULL_REQUEST_BRANCH=${GITHUB_REF_NAME}
+        export TRAVIS_BRANCH=${GITHUB_REF_NAME}
+        curl https://raw.githubusercontent.com/express42/otus-homeworks/2019-02/run.sh | bash
