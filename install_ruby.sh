@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -euo pipefail
 echo "$(basename $0)"
 sudo apt update
 sudo apt -y upgrade
