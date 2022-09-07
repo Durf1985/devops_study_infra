@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 echo "$(basename $0)"
-set -x
+set -euo pipefail
 sudo apt update
 sudo apt -y upgrade
 sudo apt install -y ruby-bundler build-essential

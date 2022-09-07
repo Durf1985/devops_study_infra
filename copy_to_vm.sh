@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+set -euo pipefail
+
 host_address="35.247.59.143"
 echo "$(basename $0)"
 scp -i ~/.ssh/appuser install_ruby.sh appuser@"$host_address":~/

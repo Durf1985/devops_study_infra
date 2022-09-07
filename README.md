@@ -212,13 +212,13 @@ in your repo `bash copy_to_vm`
 
 * `ssh username@hostname` login to target host
   
-* `bash /script/install_ruby.sh`
+* `bash /your_repository_root_directory/install_ruby.sh`
 
 ### Install mongodb
 
 * `ssh username@hostname` - login to target host
 
-* `bash /script/install_mongodb.sh`
+* `bash /your_repository_root_directory/install_mongodb.sh`
 
 ### Install application, set dependency and start server
 
@@ -230,11 +230,4 @@ in your repo `bash copy_to_vm`
 ### Install with startup script
 
 your local repository directory
-`bash script/startup_script.sh`
-
-### Packer
-
-packer build -var 'project_id=aaa' packer_example.json
-packer build -var-file variables.json packer_example.json
-packer validate -var 'project_id=aaa' packer_example.json
-packer inspect packer_example.json
+`bash /your_repository_root_directory/startup_script.sh`
