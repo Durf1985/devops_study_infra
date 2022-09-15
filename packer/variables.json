@@ -1,0 +1,6 @@
+{
+    "variables":{
+        "project_name": "clgcporg2-111",
+        "os_type": "ubuntu-1804-lts"
+    }
+}

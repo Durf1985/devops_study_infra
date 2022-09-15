@@ -1,20 +1,20 @@
 {
     "variables": {
-        "my_machine_type": "e2-medium"
+        "machine_type": "random" 
     },
     "builders": [
         {
             "type": "googlecompute",
-            "project_id": "{{`project_name`}}",
+            "project_id": "clgcporg2-111",
             "image_name": "reddit-base-{{timestamp}}",
             "image_family": "reddit-base",
-            "source_image_family": "{{`os_type`}}",
+            "source_image_family": "ubuntu-1804-lts",
             "image_storage_locations": [
                 "us-central1"
             ],
             "zone": "us-central1-a",
             "ssh_username": "appuser",
-            "machine_type": "{{user `my_machine_type`}}",
+            "machine_type": "e2-medium",
             "tags": "puma-server"
         }
     ],
