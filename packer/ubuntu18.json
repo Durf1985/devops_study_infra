@@ -2,13 +2,22 @@
     "builders": [
         {
             "type": "googlecompute",
-            "project_id": "infra-189607",
+            "project_id": "clgcporg2-111",
             "image_name": "reddit-base-{{timestamp}}",
             "image_family": "reddit-base",
             "source_image_family": "ubuntu-1804-lts",
-            "zone": "europe-west1-b",
+            "image_storage_locations": ["us-central1"],
+            "zone": "us-central1-a",
             "ssh_username": "appuser",
-            "machine_type": "f1-micro"
+            "machine_type": "e2-medium",
+            "tags": "puma-server"
+        }
+    ],
+    "provisioners": [
+        {
+            "type": "shell",
+            "script": "scripts/deploy.sh",
+            "execute_command": "{{.Path}}"
         }
     ]
 }
