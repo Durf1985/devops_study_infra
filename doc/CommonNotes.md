@@ -299,10 +299,18 @@ iptables -A INPUT -p tcp -s 172.16.238.187 --dport 22 -j ACCEPT
 
 ## Service management with SYSTEMD
 
-есть скрипт /usr/bin/project_mercury.sh
-чтобы запустить его в фоновом режиме нужно определить его как сервис, для этого нам надо создать service nit file
+есть скрипт
+
+```
+  /usr/bin/project_mercury.sh
+```
+
+чтобы запустить его в фоновом режиме нужно определить его как сервис, для этого нам надо создать `service nit file`
 путь к юниту
-/etc/systemd/system/project-mercury.service
+
+  ```
+  /etc/systemd/system/project-mercury.service
+  ```
 
 тело юнита:
 [Unit]
