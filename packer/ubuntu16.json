@@ -33,11 +33,9 @@
     "provisioners": [
         {
             "type": "shell",
-            "script": "scripts/test_deploy.sh",
+            "script": "scripts/deploy.sh",
             "execute_command": "{{.Path}}"
         }
     ]
 }
-
-
 
