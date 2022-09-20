@@ -12,7 +12,7 @@
             "project_id": "{{user `project_id`}}",
             "image_name": "reddit-full-{{timestamp}}",
             "image_family": "reddit-full",
-            "source_image_family": "{{user `source_image_family`}}",
+            "source_image_family": "reddit-base",
             "image_storage_locations": [
                 "us-central1"
             ],
@@ -33,11 +33,8 @@
     "provisioners": [
         {
             "type": "shell",
-            "script": "scripts/deploy_bake.sh",
+            "script": "scripts/launch_monapp_service.sh",
             "execute_command": "{{.Path}}"
         }
     ]
 }
-
-
-
