@@ -1,7 +1,7 @@
 {
     "variables": {
         "my_machine_type": "e2-medium",
-        "network": "projects/clgcporg2-044/global/networks/default",
+        "network": "projects/clgcporg2-046/global/networks/default",
         "diskSizeGb": "20",
         "vm_name": "instance-abc", 
         "diskTypes": "pd-balanced"

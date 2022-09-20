@@ -239,6 +239,9 @@ your local repository directory
 * setup Application Default Credentials (ADC)
 * create Packer template
 * deploy VM instance with custom OS image
+* creating a parameterized template
+* creating bake template
+* created shell-script for launch VM with custom image
 
 ### Prepare your repository
 
@@ -316,3 +319,80 @@ your local repository directory
     ```
 
 9. to check open in your browser `<instance_public_ip>:9292`
+
+### Creating a parameterized template
+
+1. Create `variables.json` file in packer folder
+2. Add in file `variables.json` all parametr and they value from category "requirment" for GCP Packer needed for your purposes
+3. Add in file `ubuntu18.json` block `"variables":{}` and fill in all parametr and they value from category "optional" for GCP Packer needed for your purposes
+4. Make a call to these variables in the `"builders":[{}]` block in the `ubuntu18.json` file
+   * syntax for call parametr
+
+    ```json
+    "builder":[
+            {
+                "some_parametr": "{{user "your_custom_parametr_name"}}"
+            }
+        ]
+
+    ```
+
+5. next step validate your build
+
+    ```bash
+    packer validate -var-file=path_to_variables.json ubuntu18.json
+     ```
+
+6. launch building image
+
+     ```bash
+    packer build -var-file=path_to_variables.json ubuntu18.json
+    ```
+
+### Creating bake template
+
+In `deploy.sh` add next content:
+
+* Heredoc file with script launch puma server
+
+```bash
+cat << EOF | tee -a ~/example.sh
+#!/bin/bash
+cd /home/appuser/
+cd reddit && bundle install
+puma -d 
+ps aux | grep puma
+EOF
+sudo chmod +x ~/example.sh
+```
+
+* Heredoc file that creates a unit to run the script described in the previous block
+
+```bash
+cat << EOF | sudo tee -a /etc/systemd/system/monapp.service
+[Unit]
+Description= Launch script
+After=mongod
+
+[Service]
+Type=forking
+User=appuser
+ExecStart=/bin/bash -c /home/appuser/example.sh
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+sudo systemctl daemon-reload
+sudo systemctl enable monapp.service
+sudo systemctl start monapp.service
+sudo systemctl status monapp.service
+```
+
+### Created shell-script for launch VM with custom image
+
+* After created bake image in previous section go to `GCP -> Compute Engine -> VM instance -> Create instance`
+* Setup VM instance. `Use your custom image` and manual check tag setting `(http-allow,https-allows,puma-server)`
+* After select `"equivalent command line"` and copy the contents of the window that opens into your script `create-reddit-vm.sh`
+* Save and launch script.
+* For checking result open in browser `<external_ip_your_VM>:9292`
