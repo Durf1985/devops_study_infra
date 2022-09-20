@@ -3,7 +3,7 @@
         "my_machine_type": "e2-medium",
         "network": "projects/clgcporg2-046/global/networks/default",
         "diskSizeGb": "20",
-        "image_description": "reddit-full", 
+        "image_description": "reddit-full",
         "diskTypes": "pd-balanced"
     },
     "builders": [
