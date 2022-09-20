@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
-echo "$(basename $0)"
+
 sudo apt update
 sudo apt -y upgrade
 sudo apt install -y ruby-bundler build-essential
@@ -20,4 +20,3 @@ sudo systemctl start mongod
 git clone -b monolith https://github.com/express42/reddit.git
 cd reddit && bundle install
 puma -d 
-ps aux | grep puma

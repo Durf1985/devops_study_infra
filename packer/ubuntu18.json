@@ -3,15 +3,15 @@
         "my_machine_type": "e2-medium",
         "network": "projects/clgcporg2-057/global/networks/default",
         "diskSizeGb": "20",
-        "vm_name": "instance-abc", 
+        "image_description": "reddit-base", 
         "diskTypes": "pd-balanced"
     },
     "builders": [
         {
             "type": "googlecompute",
             "project_id": "{{user `project_id`}}",
-            "image_name": "reddit-full-{{timestamp}}",
-            "image_family": "reddit-full",
+            "image_name": "reddit-base-{{timestamp}}",
+            "image_family": "reddit-base",
             "source_image_family": "{{user `source_image_family`}}",
             "image_storage_locations": [
                 "us-central1"
@@ -33,7 +33,7 @@
     "provisioners": [
         {
             "type": "shell",
-            "script": "scripts/deploy_bake.sh",
+            "script": "scripts/deploy.sh",
             "execute_command": "{{.Path}}"
         }
     ]

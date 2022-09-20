@@ -292,7 +292,9 @@ your local repository directory
                 "zone": "us-central1-a",
                 "ssh_username": "appuser",
                 "machine_type": "e2-medium",
-                "tags": "puma-server"
+                "tags": [
+                    "puma-server"
+                    ]
             }
         ],
              "provisioners": [
@@ -306,7 +308,7 @@ your local repository directory
     ```
 
 4. create folder `scripts` in directory packer, and copy in this catalog `install_ruby.sh` | `install_mongodb.sh` | `deploy_sh` from `config-scripts`
-5. in folder `scripts` create file `setup_vpc_gcp-script.sh`, and copy to this file GCP network settings.
+5. in folder `scripts` create file `setup_vpc_gcp_script.sh`, and copy to this file GCP network settings.
 6. validate your template `packer validate ./ubuntu18.json`
 7. and build the image `packer build ubuntu18.json`
 8. after build create VM instance with your custom OS image
@@ -323,8 +325,8 @@ your local repository directory
 ### Creating a parameterized template
 
 1. Create `variables.json` file in packer folder
-2. Add in file `variables.json` all parametr and they value from category "requirment" for GCP Packer needed for your purposes
-3. Add in file `ubuntu18.json` block `"variables":{}` and fill in all parametr and they value from category "optional" for GCP Packer needed for your purposes
+2. Add in file `variables.json` all parameters and they value from category "requirement" for GCP Packer needed for your purposes
+3. Add in file `ubuntu18.json` block `"variables":{}` and fill in all parameters and they value from category "optional" for GCP Packer needed for your purposes
 4. Make a call to these variables in the `"builders":[{}]` block in the `ubuntu18.json` file
    * syntax for call parametr
 
@@ -353,31 +355,18 @@ your local repository directory
 
 In `deploy.sh` add next content:
 
-* Heredoc file with script launch puma server
-
-```bash
-cat << EOF | tee -a ~/example.sh
-#!/bin/bash
-cd /home/appuser/
-cd reddit && bundle install
-puma -d 
-ps aux | grep puma
-EOF
-sudo chmod +x ~/example.sh
-```
-
 * Heredoc file that creates a unit to run the script described in the previous block
 
 ```bash
 cat << EOF | sudo tee -a /etc/systemd/system/monapp.service
 [Unit]
-Description= Launch script
+Description= Launch reddit application
 After=mongod
 
 [Service]
-Type=forking
-User=appuser
-ExecStart=/bin/bash -c /home/appuser/example.sh
+Type=simple
+WorkingDirectory=/home/appuser/reddit
+ExecStart=/usr/local/bin/puma
 
 [Install]
 WantedBy=multi-user.target

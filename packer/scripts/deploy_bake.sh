@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 set -euo pipefail
-echo "$(basename $0)"
 sudo apt update
 sudo apt -y upgrade
 sudo apt install -y ruby-bundler build-essential
@@ -18,25 +17,18 @@ sudo systemctl enable mongod
 sudo systemctl start mongod
 
 git clone -b monolith https://github.com/express42/reddit.git 
-
-cat << EOF | tee -a ~/example.sh
-#!/bin/bash
 cd /home/appuser/
 cd reddit && bundle install
-puma -d 
-ps aux | grep puma
-EOF
-sudo chmod +x ~/example.sh
 
 cat << EOF | sudo tee -a /etc/systemd/system/monapp.service
 [Unit]
-Description= Launch script
+Description= Launch reddit application
 After=mongod
 
 [Service]
-Type=forking
-User=appuser
-ExecStart=/bin/bash -c /home/appuser/example.sh
+Type=simple
+WorkingDirectory=/home/appuser/reddit
+ExecStart=/usr/local/bin/puma
 
 [Install]
 WantedBy=multi-user.target
