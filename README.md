@@ -231,3 +231,157 @@ in your repo `bash copy_to_vm`
 
 your local repository directory
 `bash /your_repository_root_directory/startup_script.sh`
+
+## Lecture 07 Otus Creating VM image with Packer help
+
+* prepare your repository
+* install packer
+* setup Application Default Credentials (ADC)
+* create Packer template
+* deploy VM instance with custom OS image
+* creating a parameterized template
+* creating bake template
+* created shell-script for launch VM with custom image
+
+### Prepare your repository
+
+* Create new branch `packer-base` from `master` branch
+  
+    ```bash
+    git checkout master
+    git checkout -b packer-base
+    ```
+
+* create in repository root directory new folder `mkdir config-scripts`
+* move the scripts created in Lecture 06 from the root directory to the created folder
+
+### Instal Packer
+
+* install Packer
+
+    ```bash
+    wget -O- https://apt.releases.hashicorp.com/gpg | gpg --dearmor | sudo tee /usr/share/keyrings/hashicorp-archive-keyring.gpg
+    echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
+    sudo apt update && sudo apt install packer
+    ```
+
+* check installation with command `packer -v`
+
+### Setup ADC
+
+* use commadn ```gcloud auth application-default login``` and link your GCP account to Packer
+* follow instruction in terminal
+* `gcloud init` use your project in GCP and setup region.
+
+### Create and launch Packer template
+
+1. create folder `packer` in root directory
+2. create in folder `packer` file `ubuntu18.json`
+3. add to file ubuntu18.json next content
+
+    ```json
+    {
+        "builders": [
+            { // this block is responsible for creating a virtual machine
+                "type": "googlecompute",
+                "project_id": "clgcporg2-111", // your project name (id) in GCP
+                "image_name": "reddit-base-{{timestamp}}",
+                "image_family": "reddit-base",
+                "source_image_family": "ubuntu-1804-lts",
+                "image_storage_locations": ["us-central1"],// the region that was specified during ADC initialization
+                "zone": "us-central1-a",
+                "ssh_username": "appuser",
+                "machine_type": "e2-medium",
+                "tags": [
+                    "puma-server"
+                    ]
+            }
+        ],
+             "provisioners": [
+            { //this block launch the scripts, which  installs the software on the virtual machine
+                "type": "shell",
+                "script": "scripts/deploy.sh",
+                "execute_command": "{{.Path}}"
+            }
+        ]
+    }
+    ```
+
+4. create folder `scripts` in directory packer, and copy in this catalog `install_ruby.sh` | `install_mongodb.sh` | `deploy_sh` from `config-scripts`
+5. in folder `scripts` create file `setup_vpc_gcp_script.sh`, and copy to this file GCP network settings.
+6. validate your template `packer validate ./ubuntu18.json`
+7. and build the image `packer build ubuntu18.json`
+8. after build create VM instance with your custom OS image
+    * login to VM `ssh appuser@instance_public_ip`
+    * execute next command for launch your web application
+
+    ```bash
+    cd reddit && bundle install
+    puma -d
+    ```
+
+9. to check open in your browser `<instance_public_ip>:9292`
+
+### Creating a parameterized template
+
+1. Create `variables.json` file in packer folder
+2. Add in file `variables.json` all parameters and they value from category "requirement" for GCP Packer needed for your purposes
+3. Add in file `ubuntu18.json` block `"variables":{}` and fill in all parameters and they value from category "optional" for GCP Packer needed for your purposes
+4. Make a call to these variables in the `"builders":[{}]` block in the `ubuntu18.json` file
+   * syntax for call parametr
+
+    ```json
+    "builder":[
+            {
+                "some_parametr": "{{user "your_custom_parametr_name"}}"
+            }
+        ]
+
+    ```
+
+5. next step validate your build
+
+    ```bash
+    packer validate -var-file=path_to_variables.json ubuntu18.json
+     ```
+
+6. launch building image
+
+     ```bash
+    packer build -var-file=path_to_variables.json ubuntu18.json
+    ```
+
+### Creating bake template
+
+In `deploy.sh` add next content:
+
+* Heredoc file that creates a unit to run the script described in the previous block
+
+```bash
+cat << EOF | sudo tee -a /etc/systemd/system/monapp.service
+[Unit]
+Description= Launch reddit application
+After=mongod
+
+[Service]
+Type=simple
+WorkingDirectory=/home/appuser/reddit
+ExecStart=/usr/local/bin/puma
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+sudo systemctl daemon-reload
+sudo systemctl enable monapp.service
+sudo systemctl start monapp.service
+sudo systemctl status monapp.service
+```
+
+### Created shell-script for launch VM with custom image
+
+* After created bake image in previous section go to `GCP -> Compute Engine -> VM instance -> Create instance`
+* Setup VM instance. `Use your custom image` and manual check tag setting `(http-allow,https-allows,puma-server)`
+* After select `"equivalent command line"` and copy the contents of the window that opens into your script `create-reddit-vm.sh`
+* Save and launch script.
+* For checking result open in browser `<external_ip_your_VM>:9292`
