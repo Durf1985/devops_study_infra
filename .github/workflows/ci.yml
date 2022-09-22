@@ -33,3 +33,4 @@ jobs:
       env:
         SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
         SLACK_TITLE: ${{ env.SLACK_TITLE }}
+        SLACK_COLOR: ${{ job.status }}
