@@ -8,8 +8,8 @@ terraform {
 }
 provider "google" {
 
-  project = "clgcporg2-094"
-  region  = "us-central1"
+  project = var.project
+  region  = var.region
 }
 resource "google_compute_instance" "app" {
   name         = "reddit-app"
@@ -18,7 +18,7 @@ resource "google_compute_instance" "app" {
   tags         = ["reddit-app"]
   boot_disk {
     initialize_params {
-      image = "reddit-base"
+      image = var.disk_image
     }
   }
   network_interface {
@@ -29,15 +29,15 @@ resource "google_compute_instance" "app" {
 
   }
   metadata = {
-    ssh-keys = "appuser:${file("packer/scripts/TXT.pub")}"
+    ssh-keys = "appuser:${file("${var.public_key_path}")}"
   }
 
   connection {
-    host = google_compute_instance.app.network_interface.0.access_config.0.nat_ip
+    host        = google_compute_instance.app.network_interface.0.access_config.0.nat_ip
     type        = "ssh"
     user        = "appuser"
     agent       = false
-    private_key = file("~/.ssh/appuser")
+    private_key = var.private_key_path
   }
   provisioner "file" {
     source      = "files/puma.service"
@@ -59,4 +59,13 @@ resource "google_compute_firewall" "firewall_puma" {
   source_ranges = ["0.0.0.0/0"]
   target_tags   = ["reddit-app"]
 
+}
+
+resource "google_compute_project_metadata" "my_ssh_key" {
+  for_each = var.user_name
+  
+  metadata = {
+    ssh-keys = "${each.value}:${file("${var.public_key_path}")}"
+
+  }
 }
