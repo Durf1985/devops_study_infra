@@ -28,6 +28,8 @@ variable "user_name" {
   description = "List of user names"
   default = [
     "appuser",
-    "appuser1"
+    "appuser1",
+    "appuser_web"
   ]
 }
+
