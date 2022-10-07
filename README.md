@@ -385,3 +385,257 @@ sudo systemctl status monapp.service
 * After select `"equivalent command line"` and copy the contents of the window that opens into your script `create-reddit-vm.sh`
 * Save and launch script.
 * For checking result open in browser `<external_ip_your_VM>:9292`
+
+## Lecture 08 IaC Practice using Terraform
+
+* Install Terraform
+* Create provider
+* Create VM instance
+* Creating Firewall rules
+* Creating global metadata key for all instances
+* Planing and apply terraform template
+* Creating output variables file
+* Using `reddit-base` image with provisioners, instead `reddit-full` image
+* Input vars file
+
+### Install Terraform
+
+```bash
+wget -O- https://apt.releases.hashicorp.com/gpg | gpg --dearmor | sudo tee /usr/share/keyrings/hashicorp-archive-keyring.gpg
+echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
+sudo apt update && sudo apt install terraform
+```
+
+Check installation `terraform -v`
+
+### Begining using Terraform
+
+* Create directory `terraform` in your project folder
+* Create empty file `main.tf` - this is main configure file.
+* Add in `.gitignore` file next content:
+
+```text
+*.tfstate
+*.tfstate.*.backup
+*.tfstate.backup
+*.tfvars
+.terraform.lock.hcl
+.terraform/
+```
+
+### 1. Provider
+
+* Add provider block in `main.tf` to allow control GCP via Terraform
+
+```terraform
+terraform {
+  required_version = "1.3.1" // terraform version
+  required_providers {
+    google = {
+      version = "4.0.0" // google provider version
+    }
+  }
+}
+
+provider "google" {
+  project = var.project // name your project in GCP
+  region  = var.region // region when place your project
+}
+```
+
+* Download terraform provider
+
+  ```bash
+  terraform init
+  ```
+
+### 2. Create VM instance
+
+Add in `main.tf`
+
+```
+ resource "google_compute_instance" "app" {
+  name         = "reddit-app-full" // name VM instance
+  machine_type = "e2-medium" 
+  zone         = "us-central1-a" 
+  tags         = ["reddit-app"] // network tag
+  boot_disk {
+    initialize_params {
+      image = var.disk_image // custom disk image created early full name, or only family
+    }
+  }
+  network_interface {
+    network = "default"
+    access_config {
+    }
+  }
+  metadata = {
+    ssh-keys = "appuser:${file("${var.public_key_path}")}" // ssh-key for current instance
+  }
+}
+```
+
+### 3. Creating Firewall rules
+
+Add in `main.tf`
+
+```terraform
+resource "google_compute_firewall" "firewall_puma" {
+  name    = "allow-puma-default" 
+  network = "default"
+  allow {
+    protocol = "tcp"
+    ports    = ["9292"]
+  }
+  source_ranges = ["0.0.0.0/0"]
+  target_tags   = ["reddit-app"]
+
+}
+```
+
+### 4. Creating global metadata key for all instances
+
+Add in `main.tf`
+
+```terraform
+resource "google_compute_project_metadata" "my_ssh_key" {
+  metadata = {
+    ssh-keys = join("\n", formatlist("%s:${chomp(file("${var.public_key_path}"))}", var.user_name))
+  } // used function join(), formatlist(), chomp(), file()
+}
+```
+
+### 5. Planing and apply changes
+
+* Execute command `terraform plan`, to see what will change, be deleted, or be created
+* Execute command `terraform apply`, to execute this operation.
+* Check your VM instance `ssh appuser@external_ip_address_vm_instance`
+
+### 6. Creating output variables file
+
+In folder `your_project/terraform` create `output.tf` file, and add into him follows content 
+
+```terraform
+output "app_external_ip" {
+  description = "VM instance IP"
+  value = google_compute_instance.app.network_interface.0.access_config.0.nat_ip 
+}
+
+```
+Execute command `terraform refresh` and after `terraform output` or `terraform output app_external_ip` to check.
+
+### 7. Using `reddit-base` image with provisioners, instead `reddit-full` image
+
+* In folder terraform create directory `files`
+* In `files` directory create file `puma.service` with follow content
+
+```bash
+[Unit]
+Description=Puma HTTP Server
+After=network.target
+
+[Service]
+Type=simple
+User=appuser
+WorkingDirectory=/home/appuser/reddit
+ExecStart=/bin/bash -lc 'puma'
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+```
+
+* In `files` directory create file `deploy.sh` with follow content
+
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
+
+APP_DIR=${1:-$HOME}
+
+git clone -b monolith https://github.com/express42/reddit.git "$APP_DIR"/reddit
+cd "$APP_DIR"/reddit
+bundle install
+
+sudo mv /tmp/puma.service /etc/systemd/system/puma.service
+sudo systemctl start puma
+sudo systemctl enable puma
+```
+
+* add in file `main.tf` in section `resource "google_compute_instance" "app" {}`
+  
+```terraform
+ connection {
+    host        = google_compute_instance.app.network_interface.0.access_config.0.nat_ip // external ip vm instance
+    type        = "ssh" 
+    user        = "appuser"
+    agent       = false
+    private_key = file("${var.private_key_path}") // path to private key
+  }
+  provisioner "file" {
+    source      = "files/puma.service" // path to your unit file 
+    destination = "/tmp/puma.service" // path to destination on your VM instance
+  }
+  provisioner "remote-exec" {
+    script = "files/deploy.sh" // path to script which will be executed on VM instance
+  }
+}
+```
+
+If the `resource "google_compute_instance" "app" {}` has already been created, then you need to mark it so that it is recreated the next time you run it `terraform apply`. To do this, run the command `terraform taint google_compute_instance.app`. After `terraform plan`, and then `terraform apply`
+
+After check your application in browser `http://external_ip_vm_instance:9292`
+
+### 8. Input vars file
+
+In directory `your_project_path/terraform` create file `variables.tf` with follow content
+
+```terraform
+variable "project" {
+  type = string
+  description = "Project ID"
+  
+}
+variable "region" {
+  type = string
+  description = "Region"
+  default = "us-central1"
+}
+variable "public_key_path" {
+  type = string
+  description = "Path to the public key used for ssh access"
+  
+}
+variable "disk_image" {
+  type = string
+  description = "Disk image"
+  
+}
+variable "private_key_path" {
+  type = string
+  description = "Path to private key which will be installed into project metadata"
+  default = "~/.ssh/appuser"
+}
+variable "user_name" {
+  type = set(string)
+  description = "List of user names"
+  default = [
+    "appuser",
+    "appuser1",
+    "appuser_web"
+  ]
+}
+```
+
+In directory `your_project_path/terraform` create file `terraform.tfvars` with follow content
+
+```terraform
+project = "clgcporg2-118" // name your project in GCP
+public_key_path = "/home/your_os_user_name/github_repo/devops_study_infra/packer/scripts/TXT.pub" // path to your public key
+disk_image = "reddit-full" // name of the VM image family, or definded VM image
+private_key_path = "/home/your_os_user_name/.ssh/appuser" // path to your private key on your localhost
+```
+
+### Behavior of the manually added keys to project metadata
+
+If you manually change the metadata (ssh key), using the GCP GUI in the browser or otherwise without the participation of terraform, then this resource will be marked for deletion and a new one will be created
