@@ -397,6 +397,7 @@ sudo systemctl status monapp.service
 * Creating output variables file
 * Using `reddit-base` image with provisioners, instead `reddit-full` image
 * Input vars file
+* Create load balancer with parametrization
 
 ### Install Terraform
 
@@ -453,7 +454,7 @@ provider "google" {
 
 Add in `main.tf`
 
-```
+```terraform
  resource "google_compute_instance" "app" {
   name         = "reddit-app-full" // name VM instance
   machine_type = "e2-medium" 
@@ -513,7 +514,7 @@ resource "google_compute_project_metadata" "my_ssh_key" {
 
 ### 6. Creating output variables file
 
-In folder `your_project/terraform` create `output.tf` file, and add into him follows content 
+In folder `your_project/terraform` create `output.tf` file, and add into him follows content
 
 ```terraform
 output "app_external_ip" {
@@ -522,6 +523,7 @@ output "app_external_ip" {
 }
 
 ```
+
 Execute command `terraform refresh` and after `terraform output` or `terraform output app_external_ip` to check.
 
 ### 7. Using `reddit-base` image with provisioners, instead `reddit-full` image
@@ -639,3 +641,137 @@ private_key_path = "/home/your_os_user_name/.ssh/appuser" // path to your privat
 ### Behavior of the manually added keys to project metadata
 
 If you manually change the metadata (ssh key), using the GCP GUI in the browser or otherwise without the participation of terraform, then this resource will be marked for deletion and a new one will be created
+
+
+### Create load balancer with parametrization
+
+In folder `your_repo/terraform` create file `lb.tf` with next content:
+
+```terraform
+
+resource "google_compute_instance_template" "app" { // instance template
+  name = "reddit-template"
+
+  disk {
+    auto_delete  = true
+    boot         = true
+    device_name  = "persistent-disk-0"
+    mode         = "READ_WRITE"
+    source_image = var.source_image
+    type         = "PERSISTENT"
+  }
+
+  labels = {
+    managed-by-cnrm = "true"
+  }
+  machine_type = "e2-medium"
+  metadata = {
+    ssh-keys = "appuser:${file("var.public_key_path")}" // declarated in variables.tf + terraform.tfvars
+  }
+  network_interface {
+    access_config {
+      network_tier = "PREMIUM"
+    }
+    network    = "https://www.googleapis.com/compute/v1/projects/${var.project}/global/networks/default" // variables declarated in variables.tf + terraform.tfvars
+    subnetwork = "https://www.googleapis.com/compute/v1/projects/${var.project}/regions/${var.region}/subnetworks/default" variables declarated in variables.tf + terraform.tfvars
+  }
+  region = "us-central1"
+  scheduling {
+    automatic_restart   = true
+    on_host_maintenance = "MIGRATE"
+
+  }
+  tags = ["reddit-app"]
+
+}
+
+resource "google_compute_instance_group_manager" "app" { // control section VM instances
+  name = "reddit-example"
+  zone = "us-central1-a"
+  
+  named_port { // used in resource "google_compute_backend_service"
+    name = "puma-server"
+    port = 9292
+  }
+  version {
+    instance_template = google_compute_instance_template.app.id
+    name              = "primary"
+
+  }
+  base_instance_name = "vm"
+  target_size        = var.count_vm // variables declarated in variables.tf + terraform.tfvars
+  lifecycle {
+    ignore_changes = [target_size]
+  }
+}
+
+resource "google_compute_firewall" "app" {
+  name          = "fw-allow-health-check"
+  direction     = "INGRESS"
+  network       = "https://www.googleapis.com/compute/v1/projects/${var.project}/global/networks/default" // variables declarated in variables.tf + terraform.tfvars
+  priority      = 1000
+  source_ranges = ["0.0.0.0/0"]
+  target_tags   = ["reddit-app"]
+  allow {
+    ports    = ["9292"]
+    protocol = "tcp"
+  }
+}
+
+resource "google_compute_global_address" "app" {
+  name       = "lb-ipv4-1"
+  ip_version = "IPV4"
+}
+
+resource "google_compute_health_check" "app" {
+  name               = "http-basic-check"
+  check_interval_sec = 5
+  healthy_threshold  = 2
+  http_health_check {
+    port               = 9292
+    port_specification = "USE_FIXED_PORT"
+    proxy_header       = "NONE"
+    request_path       = "/"
+  }
+  timeout_sec         = 5
+  unhealthy_threshold = 2
+}
+
+resource "google_compute_backend_service" "app" {
+  name                            = "web-backend-service"
+  connection_draining_timeout_sec = 0
+  health_checks                   = [google_compute_health_check.app.id]
+  load_balancing_scheme           = "EXTERNAL"
+  port_name                       = "puma-server"
+  protocol                        = "HTTP"
+  session_affinity                = "NONE"
+  timeout_sec                     = 30
+  backend {
+    group           = google_compute_instance_group_manager.app.instance_group
+    balancing_mode  = "UTILIZATION"
+    capacity_scaler = 0.7
+  }
+}
+
+
+resource "google_compute_url_map" "app" {
+  name            = "web-map-http"
+  default_service = google_compute_backend_service.app.id
+}
+
+resource "google_compute_target_http_proxy" "app" {
+  name    = "http-lb-proxy"
+  url_map = google_compute_url_map.app.id
+}
+resource "google_compute_global_forwarding_rule" "app" {
+  name                  = "http-content-rule"
+  ip_protocol           = "TCP"
+  load_balancing_scheme = "EXTERNAL"
+  port_range            = "80"
+  target                = google_compute_target_http_proxy.app.id
+  ip_address            = google_compute_global_address.app.id
+}
+```
+
+* After that, add variables to the variables.tf and terraform.tfvars values marked with comments in the code snippet above.
+* `terraform plan`,`terraform apply`

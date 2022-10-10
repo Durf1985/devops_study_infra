@@ -7,3 +7,4 @@ variables.json
 *.tfvars
 .terraform.lock.hcl
 .terraform/
+.tflint.hcl

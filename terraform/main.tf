@@ -1,5 +1,5 @@
 terraform {
-  required_version = "1.3.1"
+  required_version = "1.3.2"
   required_providers {
     google = {
       version = "4.0.0"
@@ -29,7 +29,7 @@ resource "google_compute_instance" "app" {
     }
   }
   metadata = {
-    ssh-keys = "appuser:${file("${var.public_key_path}")}"
+    ssh-keys = "appuser:${file(var.public_key_path)}"
   }
 }
 
@@ -50,7 +50,7 @@ resource "google_compute_firewall" "firewall_puma" {
 
 resource "google_compute_project_metadata" "my_ssh_key" {
   metadata = {
-    ssh-keys = join("\n", formatlist("%s:${chomp(file("${var.public_key_path}"))}", var.user_name))
+    ssh-keys = join("\n", formatlist("%s:${chomp(file(var.public_key_path))}", var.user_name))
   }
 }
 
