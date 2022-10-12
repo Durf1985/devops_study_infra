@@ -14,6 +14,7 @@ resource "google_compute_instance_template" "app" {
     managed-by-cnrm = "true"
   }
   machine_type = "e2-medium"
+  
   metadata = {
     ssh-keys = "appuser:${file(var.public_key_path)}"
   }

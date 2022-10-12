@@ -26,6 +26,7 @@ resource "google_compute_instance" "app" {
   network_interface {
     network = "default"
     access_config {
+      nat_ip = google_compute_address.app_ip.address // not an explicit dependency, the `app` resource will be created only after `app_ip`
     }
   }
   metadata = {
@@ -46,6 +47,15 @@ resource "google_compute_firewall" "firewall_puma" {
 
 }
 
+resource "google_compute_firewall" "firewall_ssh" {
+  name="allow-default-ssh-connect"
+  network = "default"
+  allow {
+    protocol = "tcp"
+    ports = [ "22" ]
+  }
+  source_ranges = [ "0.0.0.0/0" ]
+}
 
 
 resource "google_compute_project_metadata" "my_ssh_key" {
@@ -54,3 +64,6 @@ resource "google_compute_project_metadata" "my_ssh_key" {
   }
 }
 
+resource "google_compute_address" "app_ip" {
+  name = "reddit-app-ip"
+}
