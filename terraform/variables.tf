@@ -8,6 +8,12 @@ variable "region" {
   description = "Region"
   default     = "us-central1"
 }
+
+variable "zone" {
+  type        = string
+  description = "Zone"
+  default     = "us-central1-a"
+}
 variable "public_key_path" {
   type        = string
   description = "Path to the public key used for ssh access"

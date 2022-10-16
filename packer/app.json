@@ -35,6 +35,11 @@
             "type": "shell",
             "script": "scripts/install_ruby.sh",
             "execute_command": "{{.Path}}"
+        },
+        {
+            "type": "shell",
+            "script": "scripts/launch_monapp_service.sh",
+            "execute_command": "{{.Path}}"
         }
     ]
 }
