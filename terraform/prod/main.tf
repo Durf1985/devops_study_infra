@@ -26,7 +26,7 @@ module "db" {
 }
 module "vpc" {
   source        = "../modules/vpc"
-  source_ranges = ["0.0.0.0/0"]
+  source_ranges = [var.source_ranges]
 
 }
 resource "google_compute_project_metadata" "my_ssh_key" {

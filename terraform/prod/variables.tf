@@ -58,3 +58,9 @@ variable "db_disk_image" {
   description = "Disk image for reddit db"
   default     = "reddit-db-base"
 }
+
+variable "source_ranges" {
+  type        = string
+  description = "IP address for firewallS"
+
+}
