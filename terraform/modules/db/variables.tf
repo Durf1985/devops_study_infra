@@ -1,5 +1,5 @@
 variable "db_disk_image" {
-  type = string
+  type        = string
   description = "Disk image for reddit db"
   default     = "reddit-db-base"
 }
@@ -12,4 +12,9 @@ variable "zone" {
   type        = string
   description = "Zone"
   default     = "us-central1-a"
+}
+variable "db_port" {
+  type        = list(string)
+  description = "DB port"
+  default     = ["27017"]
 }

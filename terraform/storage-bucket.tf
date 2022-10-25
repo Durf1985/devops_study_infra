@@ -13,7 +13,7 @@ provider "google" {
 module "storage-bucket" {
   source   = "SweetOps/storage-bucket/google"
   version  = "0.4.0"
-  name     = "reddit-app-bucket"
+  name     = "reddit-app-bucket-20221026"
   location = "us-central1"
   enabled  = true
 

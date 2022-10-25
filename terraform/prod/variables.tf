@@ -24,11 +24,11 @@ variable "disk_image" {
   description = "Disk image"
 
 }
-# variable "private_key_path" {
-#   type        = string
-#   description = "Path to private key which will be installed into project metadata"
-#   default     = "~/.ssh/appuser"
-# }
+variable "private_key_path" {
+  type        = string
+  description = "Path to private key which will be installed into project metadata"
+  default     = "~/.ssh/appuser"
+}
 variable "user_name" {
   type        = set(string)
   description = "List of user names"
@@ -60,7 +60,7 @@ variable "db_disk_image" {
 }
 
 variable "source_ranges" {
-  type        = string
+  type        = list(string)
   description = "IP address for firewallS"
 
 }

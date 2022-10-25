@@ -16,7 +16,25 @@ resource "google_compute_instance" "app" {
     ssh-keys = "appuser:${file(var.public_key_path)}"
   }
 }
+resource "null_resource" "app" {
+  count = var.app_provision_enabled ? 1 : 0
 
+  connection {
+    type = "ssh"
+
+    host        = google_compute_address.app_ip.address
+    user        = "appuser"
+    agent       = false
+    private_key = file(var.private_key_path) // переопределяется в проде или стейдже, здесь просте объявляется
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "echo DATABASE_URL=${var.db_address} | sudo tee -a /etc/default/puma",
+    ]
+  }
+
+}
 
 resource "google_compute_address" "app_ip" {
   name = "reddit-app-ip"
@@ -28,8 +46,10 @@ resource "google_compute_firewall" "firewall_puma" {
   network = "default"
   allow {
     protocol = "tcp"
-    ports    = ["9292"]
+    ports    = var.app_port
   }
   source_ranges = ["0.0.0.0/0"]
   target_tags   = ["reddit-app"]
 }
+
+
