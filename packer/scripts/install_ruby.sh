@@ -11,3 +11,5 @@ sudo apt install -y ruby2.3 ruby2.3-dev
 
 ruby -v
 bundler -v
+git clone -b monolith https://github.com/express42/reddit.git
+cd reddit && bundle install

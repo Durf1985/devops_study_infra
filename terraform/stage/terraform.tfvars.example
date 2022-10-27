@@ -1,0 +1,6 @@
+project = "clgcporg2-072"
+public_key_path = "~/github_repo/devops_study_infra/packer/scripts/TXT.pub"
+disk_image = "reddit-full"
+private_key_path = "~/.ssh/appuser"
+count_vm = 2
+source_image = "projects/clgcporg2-067/global/images/reddit-full-1665389936"
