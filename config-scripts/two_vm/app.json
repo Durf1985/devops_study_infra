@@ -1,0 +1,45 @@
+{
+    "variables": {
+        "my_machine_type": "e2-medium",
+        "network": "projects/{{user `project_id`}}/global/networks/default",
+        "diskSizeGb": "15",
+        "image_description": "reddit-base",
+        "diskTypes": "pd-balanced"
+    },
+    "builders": [
+        {
+            "type": "googlecompute",
+            "project_id": "{{user `project_id`}}",
+            "image_name": "reddit-app-base-1",
+            "image_family": "reddit-app-base",
+            "source_image_family": "{{user `source_image_family`}}",
+            "image_storage_locations": [
+                "us-central1"
+            ],
+            "zone": "us-central1-a",
+            "ssh_username": "appuser",
+            "machine_type": "{{user `my_machine_type`}}",
+            "disk_size": "{{user `diskSizeGb`}}",
+            "disk_type": "{{user `diskTypes`}}",
+            "network": "{{user `network`}}",
+            "tags": [
+                "puma-server",
+                "http-server",
+                "https-server"
+            ],
+            "image_description": "{{user `vm_name`}}"
+        }
+    ],
+    "provisioners": [
+        {
+            "type": "shell",
+            "script": "install_ruby.sh",
+            "execute_command": "{{.Path}}"
+        },
+        {
+            "type": "shell",
+            "script": "launch_monapp_service.sh",
+            "execute_command": "{{.Path}}"
+        }
+    ]
+}
