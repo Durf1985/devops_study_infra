@@ -8,4 +8,6 @@ variables.json
 .terraform.lock.hcl
 .terraform/
 .tflint.hcl
+.vscode/
 venv
+vars.yml

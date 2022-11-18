@@ -2,8 +2,12 @@
 set -euo pipefail
 script_path=$(dirname "$(readlink -f "$0")")
 project="$(grep -o 'clgcporg2....' "$script_path"/terraform/prod/terraform.tfstate | head -1)"
+# project="clgcporg2-052"
 gcloud init
 gcloud auth application-default login
+# gcloud projects create clgporg2-010
+
+
 replace="$(gcloud projects list --format=json | jq '.[0] | .name' --raw-output)"
 
 sed -i 's/'"$project"'/'"$replace"'/g' "$script_path"/config-scripts/two_vm/variables.json
@@ -31,5 +35,5 @@ sed -i 's/'"$inventory_external_ip_db"'/'"$external_ip_db"'/g' "$script_path"/an
 deactivate
 
 
-# bash -x deploy.sh -строчное отображение выполнения скрипта
-# export PROJdct_DIR общая переменная для скриптов вызываемых в main скрипте
+# bash -x deploy.sh -строчное displaying script execution
+# export PROJdct_DIR a common variable for scripts called in the main script

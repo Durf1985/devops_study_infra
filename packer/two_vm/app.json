@@ -1,6 +1,6 @@
 {
     "variables": {
-        "my_machine_type": "e2-medium",
+        "my_machine_type": "e2-micro",
         "network": "projects/{{user `project_id`}}/global/networks/default",
         "diskSizeGb": "15",
         "image_description": "reddit-base",
