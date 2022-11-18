@@ -1,17 +1,9 @@
-all:
-  children:
-    app:
-      hosts:
-        appserver:
-          remote_user: appuser
-          vars_files:
-            -vars.yml
-          vars:
-            ansible_ssh_private_key_file: "{{ key1 }}" ## check this settings. Not working
-          ansible_host: 34.28.45.247
-            
-    db:
-      hosts:
-        dbserver:
-          ansible_host: 35.239.121.130
-        
+app:
+  hosts:
+    appserver:
+      ansible_host: 34.133.49.109
+db:
+  hosts:
+    dbserver:
+      ansible_host: 34.173.216.76
+
