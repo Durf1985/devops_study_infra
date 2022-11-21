@@ -11,3 +11,6 @@ variables.json
 .vscode/
 venv
 vars.yml
+output.json
+friendly-legacy-368105-a3c24f07cc02.json
+.terraform.tfstate.lock.info
