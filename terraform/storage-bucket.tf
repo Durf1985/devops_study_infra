@@ -1,5 +1,5 @@
 terraform {
-  required_version = "1.3.2"
+  required_version = "1.3.3"
   required_providers {
     google = {
       version = "4.0.0"
@@ -13,7 +13,7 @@ provider "google" {
 module "storage-bucket" {
   source   = "SweetOps/storage-bucket/google"
   version  = "0.4.0"
-  name     = "reddit-app-bucket-20221026"
+  name     = "reddit-app-bucket-20221101"
   location = "us-central1"
   enabled  = true
 
