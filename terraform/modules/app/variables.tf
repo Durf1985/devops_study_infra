@@ -16,7 +16,7 @@ variable "public_key_path" {
 variable "app_provision_enabled" {
   type        = bool
   description = "Provision switch"
-  default     = true
+  default     = false
 }
 
 variable "db_address" {

@@ -1,0 +1,40 @@
+{
+    "variables": {
+        "my_machine_type": "e2-medium",
+        "network": "projects/{{user `project_id`}}/global/networks/default",
+        "diskSizeGb": "15",
+        "image_description": "reddit-base",
+        "diskTypes": "pd-balanced"
+    },
+    "builders": [
+        {
+            "type": "googlecompute",
+            "project_id": "{{user `project_id`}}",
+            "image_name": "reddit-db-base-2",
+            "image_family": "reddit-db-base",
+            "source_image_family": "{{user `source_image_family`}}",
+            "image_storage_locations": [
+                "europe-north1"
+            ],
+            "zone": "europe-north1-a",
+            "ssh_username": "appuser",
+            "machine_type": "{{user `my_machine_type`}}",
+            "disk_size": "{{user `diskSizeGb`}}",
+            "disk_type": "{{user `diskTypes`}}",
+            "network": "{{user `network`}}",
+            "tags": [
+                "puma-server",
+                "http-server",
+                "https-server"
+            ],
+            "image_description": "{{user `vm_name`}}"
+        }
+    ],
+    "provisioners": [
+        {
+            "type": "shell",
+            "script": "install_mongodb.sh",
+            "execute_command": "{{.Path}}"
+        }
+    ]
+}
