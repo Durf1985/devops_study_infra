@@ -44,9 +44,9 @@
 
     - name: enable puma
       become: true
-      systemd: 
+      systemd:
         name: monapp
-        enabled: yes
+        enabled: true
       tags: app-tag
 
   handlers:
@@ -56,10 +56,10 @@
         name: mongod
         state: restarted
         daemon_reload: true
-        
+
     - name: reload puma
       become: true
-      systemd: 
+      systemd:
         name: monapp
         state: restarted
         daemon_reload: true

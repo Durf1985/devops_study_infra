@@ -5,7 +5,7 @@ projects:
   - friendly-legacy-368105
 
 auth_kind: serviceaccount
-service_account_file: inventory_gcp/friendly-legacy-368105-a3c24f07cc02.json
+service_account_file: inventory_gcp/friendly-legacy-368105-a10bd8de117b.json
 
 keyed_groups:
   - prefix: VM
