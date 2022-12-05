@@ -10,10 +10,7 @@ variables.json
 .tflint.hcl
 .vscode/
 venv
-vars.yml
-output.json
 friendly-legacy-368105-a10bd8de117b.json
 .terraform.tfstate.lock.info
 *.retry
 gce.ini
-
