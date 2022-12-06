@@ -10,13 +10,13 @@
         {
             "type": "googlecompute",
             "project_id": "{{user `project_id`}}",
-            "image_name": "reddit-app-{{timestamp}}",
-            "image_family": "reddit-app",
+            "image_name": "reddit-app-base-3",
+            "image_family": "reddit-app-base",
             "source_image_family": "{{user `source_image_family`}}",
             "image_storage_locations": [
-                "us-central1"
+                "europe-north1"
             ],
-            "zone": "us-central1-a",
+            "zone": "europe-north1-a",
             "ssh_username": "appuser",
             "machine_type": "{{user `my_machine_type`}}",
             "disk_size": "{{user `diskSizeGb`}}",
@@ -32,14 +32,8 @@
     ],
     "provisioners": [
         {
-            "type": "shell",
-            "script": "scripts/install_ruby.sh",
-            "execute_command": "{{.Path}}"
-        },
-        {
-            "type": "shell",
-            "script": "scripts/launch_monapp_service.sh",
-            "execute_command": "{{.Path}}"
+            "type": "ansible",
+            "playbook_file": "ansible/packer_app.yml"
         }
     ]
 }
