@@ -1,0 +1,32 @@
+---
+- name: Install Ruby && Bundler
+  hosts: all
+  become: true
+  tasks:
+    - name: apt update
+      ansible.builtin.apt:
+        update_cache: true
+
+    - name: apt upgrade
+      ansible.builtin.apt:
+        upgrade: full
+
+    - name: install ruby-bundler build-essential
+      ansible.builtin.apt:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - ruby-bundler
+        - build-essential
+
+    - name: add-apt-repository ppa:brightbox/ruby-ng-experimental
+      ansible.builtin.apt_repository:
+        repo: ppa:brightbox/ruby-ng-experimental
+
+    - name: Install Ruby
+      ansible.builtin.apt:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - ruby2.3
+        - ruby2.3-dev

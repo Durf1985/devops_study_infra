@@ -1,0 +1,28 @@
+---
+- name: Configure Puma
+  hosts: tag_reddit-app
+  become: true
+  vars:
+    db_host: "{{hostvars['reddit-db']['gce_private_ip']}}"
+  tasks:
+    - name: Add unit file for Puma
+      copy:
+        src: files/monapp.service
+        dest: /etc/systemd/system/monapp.service
+      notify: reload puma
+    - name: Add config for DB connection
+      template:
+        src: templates/db_config.j2
+        dest: /home/appuser/db_config
+        owner: appuser
+        group: appuser
+    - name: Enable Puma
+      systemd:
+        name: monapp
+        enabled: true
+  handlers:
+    - name: reload puma
+      systemd:
+        name: monapp
+        state: restarted
+        daemon_reload: true

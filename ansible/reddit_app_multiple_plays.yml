@@ -1,0 +1,49 @@
+---
+- name: Configure MongoDB
+  hosts: db
+  tags: db-tag
+  become: true
+  vars:
+    mongo_bind_ip: 0.0.0.0
+  tasks:
+    - name: Change mongo config file
+      template:
+        src: templates/mongod.conf.j2
+        dest: /etc/mongod.conf
+        mode: 0644
+      notify: restart mongod
+
+  handlers:
+    - name: restart mongod
+      systemd:
+        name: mongod
+        state: restarted
+        daemon_reload: true
+- name: Configure Puma
+  hosts: app
+  tags: app-tag
+  become: true
+  vars:
+    db_host: 10.166.0.26
+  tasks:
+    - name: Add unit file for Puma
+      copy:
+        src: files/monapp.service
+        dest: /etc/systemd/system/monapp.service
+      notify: reload puma
+    - name: Add config for DB connection
+      template:
+        src: templates/db_config.j2
+        dest: /home/appuser/db_config
+        owner: appuser
+        group: appuser
+    - name: Enable Puma
+      systemd:
+        name: monapp
+        enabled: true
+  handlers:
+    - name: reload puma
+      systemd:
+        name: monapp
+        state: restarted
+        daemon_reload: true

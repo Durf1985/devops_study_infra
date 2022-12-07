@@ -1,0 +1,4 @@
+---
+- ansible.builtin.import_playbook: db.yml
+- ansible.builtin.import_playbook: app.yml
+- ansible.builtin.import_playbook: deploy.yml

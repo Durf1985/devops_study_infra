@@ -10,8 +10,8 @@
         {
             "type": "googlecompute",
             "project_id": "{{user `project_id`}}",
-            "image_name": "reddit-db-base-3",
-            "image_family": "reddit-db-base",
+            "image_name": "reddit-app-base-2",
+            "image_family": "reddit-app-base",
             "source_image_family": "{{user `source_image_family`}}",
             "image_storage_locations": [
                 "europe-north1"
@@ -32,8 +32,14 @@
     ],
     "provisioners": [
         {
-            "type": "ansible",
-            "playbook_file": "ansible/packer_db.yml"
+            "type": "shell",
+            "script": "install_ruby.sh",
+            "execute_command": "{{.Path}}"
+        },
+        {
+            "type": "shell",
+            "script": "launch_monapp_service.sh",
+            "execute_command": "{{.Path}}"
         }
     ]
 }

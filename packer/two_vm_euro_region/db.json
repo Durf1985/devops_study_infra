@@ -10,7 +10,7 @@
         {
             "type": "googlecompute",
             "project_id": "{{user `project_id`}}",
-            "image_name": "reddit-db-base-3",
+            "image_name": "reddit-db-base-2",
             "image_family": "reddit-db-base",
             "source_image_family": "{{user `source_image_family`}}",
             "image_storage_locations": [
@@ -32,8 +32,9 @@
     ],
     "provisioners": [
         {
-            "type": "ansible",
-            "playbook_file": "ansible/packer_db.yml"
+            "type": "shell",
+            "script": "install_mongodb.sh",
+            "execute_command": "{{.Path}}"
         }
     ]
 }
