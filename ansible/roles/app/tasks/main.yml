@@ -1,0 +1,20 @@
+---
+# tasks file for app
+
+- name: Add unit file for Puma
+  ansible.builtin.copy:
+    src: files/monapp.service
+    dest: /etc/systemd/system/monapp.service
+  notify: Reload puma
+
+- name: Add config for DB connection
+  ansible.builtin.template:
+    src: templates/db_config.j2
+    dest: /home/appuser/db_config
+    owner: appuser
+    group: appuser
+
+- name: Enable Puma
+  ansible.builtin.systemd:
+    name: monapp
+    enabled: true
