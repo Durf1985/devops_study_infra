@@ -1,10 +1,14 @@
 ---
 # tasks file for app
+- name: Show info about the env this host belongs to
+  ansible.builtin.debug:
+    msg: "This host is in {{ env }} environment!!!"
 
 - name: Add unit file for Puma
   ansible.builtin.copy:
     src: files/monapp.service
     dest: /etc/systemd/system/monapp.service
+    # mode: 0660
   notify: Reload puma
 
 - name: Add config for DB connection
@@ -18,3 +22,4 @@
   ansible.builtin.systemd:
     name: monapp
     enabled: true
+    daemon_reload: true
