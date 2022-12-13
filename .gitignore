@@ -14,3 +14,4 @@ friendly-legacy-368105-a10bd8de117b.json
 .terraform.tfstate.lock.info
 *.retry
 gce.ini
+jdauphant.nginx
