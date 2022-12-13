@@ -15,3 +15,4 @@ friendly-legacy-368105-a10bd8de117b.json
 *.retry
 gce.ini
 jdauphant.nginx
+vault.key
