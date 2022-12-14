@@ -3,19 +3,19 @@
   hosts: tag_reddit-app
   tasks:
     - name: Fetch the latest version of application code
-      git:
+      ansible.builtin.git:
         repo: 'https://github.com/express42/reddit.git'
         dest: /home/appuser/reddit
         version: monolith
-      notify: reload puma
+      notify: Reload puma
     - name: Bundle install
-      bundler:
+      community.general.bundler:
         state: present
         chdir: /home/appuser/reddit
   handlers:
-    - name: reload puma
+    - name: Reload puma
       become: true
-      systemd:
+      ansible.builtin.systemd:
         name: monapp
         state: restarted
         daemon_reload: true

@@ -12,11 +12,11 @@
         repo: deb http://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/3.2 multiverse
         state: present
 
-    - name: apt update
+    - name: Apt update
       ansible.builtin.apt:
         update_cache: true
 
-    - name: apt upgrade
+    - name: Apt upgrade
       ansible.builtin.apt:
         upgrade: full
 
@@ -25,7 +25,7 @@
         name: mongodb-org
         state: present
 
-    - name: enable mongod
+    - name: Enable mongod
       ansible.builtin.systemd:
         name: mongod
         daemon_reload: true

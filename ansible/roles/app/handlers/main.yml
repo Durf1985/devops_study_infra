@@ -1,0 +1,7 @@
+---
+# handlers file for app
+- name: Reload puma
+  ansible.builtin.systemd:
+    name: monapp
+    state: restarted
+    daemon_reload: true
