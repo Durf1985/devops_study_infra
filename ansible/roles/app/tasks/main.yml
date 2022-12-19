@@ -4,22 +4,7 @@
   ansible.builtin.debug:
     msg: "This host is in {{ env }} environment!!!"
 
-- name: Add unit file for Puma
-  ansible.builtin.copy:
-    src: monapp.service
-    dest: /etc/systemd/system/monapp.service
-    # mode: 0660
-  notify: Reload puma
-
-- name: Add config for DB connection
-  ansible.builtin.template:
-    src: db_config.j2
-    dest: /home/appuser/db_config
-    owner: appuser
-    group: appuser
-
-- name: Enable Puma
-  ansible.builtin.systemd:
-    name: monapp
-    enabled: true
-    daemon_reload: true
+- name: Install Ruby and build-essential
+  ansible.builtin.include: ruby.yml
+- name: Install Puma
+  ansible.builtin.include: puma.yml

@@ -1,5 +1,8 @@
 ---
-- ansible.builtin.import_playbook: db.yml
-- ansible.builtin.import_playbook: app.yml
-- ansible.builtin.import_playbook: deploy.yml
-- ansible.builtin.import_playbook: users.yml
+- name: Install MongoDB VM
+  ansible.builtin.import_playbook: db.yml
+- name: Install Reddit monolith VM
+  ansible.builtin.import_playbook: app.yml
+- name: Install Reddit application
+  ansible.builtin.import_playbook: deploy.yml
+# - ansible.builtin.import_playbook: users.yml
