@@ -3,13 +3,10 @@
   hosts: all
   become: true
 
-  # vars_files:
-    # - "{{ inventory_dir }}/credentials.yml"
+  vars_files:
+    - "{{ inventory_dir }}/credentials.yml"
 
   tasks:
-    - name: Debug
-      ansible.builtin.debug:
-        msg: "{{ inventory_dir }}"
     - name: Create users
       ansible.builtin.user:
         name: "{{ item.key }}"
