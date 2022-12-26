@@ -4,6 +4,9 @@
   ansible.builtin.debug:
     msg: "This host is in {{ env }} environment"
 - name: Install MongoDB 3.2
-  ansible.builtin.include: install_mongo.yml
+  ansible.builtin.include_tasks: install_mongo.yml
+  args:
+    apply:
+      become: true
 - name: Configure MongoDB
-  ansible.builtin.include: config_mongo.yml
+  ansible.builtin.include_tasks: config_mongo.yml

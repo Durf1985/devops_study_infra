@@ -1,5 +1,6 @@
 ---
 - name: Change mongo config file
+  become: true
   ansible.builtin.template:
     src: mongod.conf.j2
     dest: /etc/mongod.conf

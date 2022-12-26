@@ -13,6 +13,7 @@
 
 - name: Apt update
   ansible.builtin.apt:
+    cache_valid_time: 300
     update_cache: true
   tags: install
 
