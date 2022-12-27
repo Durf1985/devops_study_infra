@@ -1,2 +1,5 @@
 - src: jdauphant.nginx
   version: v2.21.1
+- src: https://github.com/Durf1985/ansible-db.git 
+  name: db
+  version: dae8e1d
