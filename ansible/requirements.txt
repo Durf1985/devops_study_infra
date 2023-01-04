@@ -1,1 +1,7 @@
 ansible==2.10.6
+molecule>=2.6
+pytest-testinfra>=1.10
+python-vagrant>=0.5.15
+molecule_vagrant==1.0.0 
+flake8>=6.0.0
+ansible-lint>=6.10.0

@@ -642,7 +642,6 @@ private_key_path = "/home/your_os_user_name/.ssh/appuser" // path to your privat
 
 If you manually change the metadata (ssh key), using the GCP GUI in the browser or otherwise without the participation of terraform, then this resource will be marked for deletion and a new one will be created
 
-
 ### Create load balancer with parametrization
 
 In folder `your_repo/terraform` create file `lb.tf` with next content:
@@ -775,3 +774,202 @@ resource "google_compute_global_forwarding_rule" "app" {
 
 * After that, add variables to the variables.tf and terraform.tfvars values marked with comments in the code snippet above.
 * `terraform plan`,`terraform apply`
+
+## Lecture Otus 10 - 13 Ansible
+
+Lectures from 10 to 13 use different directory structures, different inventory files, etc. This documentation will describe the last used version of the repository, dependencies, inventories, etc. That is, the version from the 13th lecture will be used.
+
+### Installing Ansible, Vagrant, Ruby, VirtualBox
+
+* Make sure you have Python installed using the `python --version` command, if it is not installed on your PC, then follow the instructions at the following link <https://wiki.python.org/moin/BeginnersGuide/Download>
+* Install pip (use google to found instruction)
+* Create directory `~/your_repo/ansible`
+* In directory `~/your_repo/ansible` create virtual environment. Command: `virtualenv venv`. Add `venv` directory to `.gitignore`
+* Activate your virtual environment. Command:
+
+```bash
+source ~/your_repo/ansible/venv/bin/activate
+```
+
+* After the previous paragraph, all software will be installed in a separate virtual environment `venv` and this software will not be available outside of this environment. (To disable the virtual environment, run the `deactivate` command)
+* Create file `~/your_repo/ansible/requirements.txt`. This file will specify the necessary programs and the required version to work with. In this file add next content:
+
+```text
+  ansible==2.10.6
+  molecule>=2.6
+  pytest-testinfra>=1.10
+  python-vagrant>=0.5.15
+  molecule_vagrant==1.0.0 
+  flake8>=6.0.0
+  ansible-lint>=6.10.0
+```
+
+* Activate your venv and execute command, which installed pre-requesits soft from your file:
+
+```bash
+  python3 -m pip install -r ~/your_repo/ansible/requirements.txt
+```
+
+* Install Vagrant and VirtualBox
+  
+```bash
+  
+wget -O- https://apt.releases.hashicorp.com/gpg | gpg --dearmor | sudo tee /usr/share/keyrings/hashicorp-archive-keyring.gpg
+echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
+sudo apt update && sudo apt install vagrant
+
+echo "deb [arch=amd64 signed-by=/usr/share/keyrings/oracle-virtualbox-2016.gpg] https://download.virtualbox.org/virtualbox/debian $(lsb_release -cs) contrib" | sudo tee -a /etc/apt/sources.list.d/virtualbox.list
+wget -O- https://www.virtualbox.org/download/oracle_vbox_2016.asc | sudo gpg --dearmor --yes --output /usr/share/keyrings/oracle-virtualbox-2016.gpg
+sudo apt update
+sudo apt install virtualbox-6.1
+```
+
+* Install Ruby. Command:
+
+```bash
+  sudo apt-get install ruby-full
+ ```
+
+### Setup Ansible
+
+* In directory `~/your_repo/ansible` create next directories
+  
+```text
+ environments
+ gce_py
+ playbooks
+ roles
+```
+
+and files
+
+```text
+ ansible.cfg
+ Vagrantfile
+ ```
+
+* In `ansible.cfg` there should be the following content
+
+```text
+[defaults]
+interpreter_python = auto
+inventory = environments/stage/gce.py  # what kind of environment should playbooks work with (stage, prod, dev and etc)
+roles_path = ./roles  # location of roles
+remote_user = appuser
+private_key_file = path to your ssh key
+host_key_checking = False
+retry_files_enabled = False
+vault_password_file = path to your vault key word
+
+[diff]
+always = True
+context = 5
+```
+
+* In `Vagrantfile` there should be config for your local VMs (see file in repository)
+
+* Create GCE Service Account <https://cloud.google.com/compute/docs/access/service-accounts> and save on your local host in directory `~/your_repo/ansible/gce_py/` key in `*.json` format from GCP for your dynamic inventory script
+  
+* In directory `environments` place files and folders responsible for various environments, which contain their own variables and settings, as well as a dynamic inventory script. Your roles will take values from these directories depending on the environment
+  
+```text
+├── environments
+│   └── stage //environment
+│       ├── credentials.yml // encrypted credentials for VM instances
+│       ├── gce.ini // File with GCE Service Account configuration and contains the path to ~/your_repo/gce_py/credentials.json
+│       ├── gce.py // dynamic inventory script
+│       ├── group_vars
+│       │   ├── all
+│       │   ├── tag_reddit-app.yml
+│       │   └── tag_reddit-db.yml
+│       ├── inventory // manual inventory, can be used if you defined it in ansible.cfg
+│       └── requirements.yml // a file with a list of roles to be imported
+   
+```
+
+* To check your dynamic inventory execute in directory `~/your_repo/ansible` next command
+
+```bash
+ansible-inventory --list 
+```
+
+* You place your playbooks in the `playbooks` directory. In the `roles` directory you place the roles
+* Roles have the following sturcture
+
+```text
+ roles
+│   ├── app // role name
+│   │   ├── defaults
+│   │   │   └── main.yml // default variables that are used in templates and tasks can be overridden by the environment
+│   │   ├── files // directory with files that may be required to deploy the role
+│   │   ├── handlers 
+│   │   │   └── main.yml // calling handlers, such as restarting services 
+│   │   ├── meta // a directory with a file containing meta information for installation via ansible-galaxy
+│   │   ├── tasks
+│   │   │   ├── main.yml // tasks to be completed
+│   │   │   ├── puma.yml
+│   │   │   └── ruby.yml
+│   │   └── templates
+│   │       ├── db_config.j2 // dynamic configuration file templates
+│   │       └── monapp.service.j2
+```
+
+* To import roles, run the following command in the directory `~/your_repo/ansible`
+
+```bash
+ansible-galaxy install -r environments/stage/requirements.yml  
+```
+
+* To run playbooks, run the following command in the directory `~/your_repo/ansible`
+
+```bash
+ansible-playbook playbooks/your_playbook.yml
+```
+
+### Vagrant, Molecule
+
+#### Vagrant
+
+* To create the virtual machines described in the VagrantFile file in the `~/your_repo/ansible` directory, run the following command
+
+```bash
+vagrant up
+```
+
+* To check the VMs status, run the command
+
+```bash
+vagrant status
+```
+
+* you can check the network settings using an ssh connection to a local virtual machine
+
+```bash
+vagrant ssh your_vm_name
+ping -c 2 ip_addres_another_vagrant_vm_from_VagrantFile
+exit
+```
+
+* To start individual provisioner, you must run the command
+
+```bash
+vagrant provision vm_name
+```
+
+#### Molecule
+
+* To initialize the molecule for role, issue the following command in directory `~/your_repo/ansible/roles/your_role_dir`
+
+```bash
+  molecule init scenario -r your_role_name -d vagrant default
+```
+
+The structure of the script is described in the documentation at the link <https://molecule.readthedocs.io/en/latest/getting-started.html>
+
+After configuring the script, you can use the command:
+
+```bash
+molecule --help
+```
+
+And choose usage scenario you need.

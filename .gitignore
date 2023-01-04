@@ -16,3 +16,9 @@ friendly-legacy-368105-a10bd8de117b.json
 gce.ini
 jdauphant.nginx
 vault.key
+.vagrant/
+*.log
+*.pyc
+.molecule
+.cache
+.pytest_cache
